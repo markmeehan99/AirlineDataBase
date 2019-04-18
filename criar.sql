@@ -51,7 +51,7 @@ CREATE TABLE Bagagem (
     largura real not null CHECK (largura > 0 and largura < 1.19),
     altura real not null CHECK (altura > 0 and altura < 0.81),
     peso real not null CHECK (peso > 0 and peso < 35),
-    lugar int REFERENCES Bilhete(lugar) ON DELETE SET NULL NOT NULL ON CONFLICT ABORT
+    lugar int REFERENCES Bilhete(lugar)
 );
 
 --Bilhete
@@ -60,8 +60,8 @@ DROP TABLE IF EXISTS Bilhete;
 CREATE TABLE Bilhete (
     lugar int not null CHECK (lugar < 201), --int?
     preco int not null CHECK (preco > 0),
-    email text REFERENCES Conta(email) ON DELETE SET NULL NOT NULL ON CONFLICT ABORT,
-    idVoo int REFERENCES Voo(idVoo) ON DELETE SET NULL NOT NULL ON CONFLICT ABORT,
+    email text REFERENCES Conta(email) ,
+    idVoo int REFERENCES Voo(idVoo) ,
     PRIMARY KEY (lugar)
 );
 
@@ -79,8 +79,8 @@ DROP TABLE IF EXISTS Passageiro;
 
 CREATE TABLE Passageiro (
     idPassageiro int PRIMARY KEY,
-    email text REFERENCES Conta(email) on DELETE set null not null on CONFLICT ABORT,
-    idPessoa text REFERENCES Pessoa(idPessoa) on DELETE set null not null on CONFLICT ABORT
+    email text REFERENCES Conta(email) ,
+    idPessoa int REFERENCES Pessoa(idPessoa)
 );
 
 --Piloto
@@ -89,7 +89,7 @@ DROP TABLE IF EXISTS Piloto;
 CREATE TABLE Piloto (
     idEmpresa int PRIMARY KEY,
     horasVoo int not null,
-    idPessoa text REFERENCES Pessoa(idPessoa) on delete set null not null on CONFLICT ABORT
+    idPessoa text REFERENCES Pessoa(idPessoa) 
 );
 
 --AssistenteBordo
@@ -98,7 +98,7 @@ DROP TABLE IF EXISTS AssistenteBordo;
 CREATE TABLE AssistenteBordo (
     idEmpresa int PRIMARY KEY,
     horasVoo int not null,
-    idPessoa text REFERENCES Pessoa(idPessoa) on delete set null not null on CONFLICT ABORT
+    idPessoa text REFERENCES Pessoa(idPessoa) 
 );
 
 --Pessoa
