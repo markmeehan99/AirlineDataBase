@@ -28,7 +28,7 @@ CREATE TABLE Voo (
 DROP TABLE IF EXISTS Origem;
 
 CREATE TABLE Origem (
-    idVoo text REFERENCES Voo(idVoo) NOT NULL,
+    idVoo text REFERENCES Voo(idVoo),
     idAeroporto text REFERENCES Aeroporto(idAeroporto) NOT NULL,
     PRIMARY KEY (idVoo)
 );
@@ -37,8 +37,8 @@ CREATE TABLE Origem (
 DROP TABLE IF EXISTS Destino;
 
 CREATE TABLE Destino (
-    idVoo int REFERENCES Voo(idVoo) NOT NULL,
-    idAeroporto int REFERENCES Aeroporto(idAeroporto) NOT NULL,
+    idVoo text REFERENCES Voo(idVoo),
+    idAeroporto text REFERENCES Aeroporto(idAeroporto) NOT NULL,
     PRIMARY KEY (idVoo)
 );
 
@@ -47,22 +47,23 @@ DROP TABLE IF EXISTS Bagagem;
 
 CREATE TABLE Bagagem (
     idBagagem int PRIMARY KEY,
-    comprimento int not null CHECK (comprimento > 0 and comprimento < 1.19),
-    largura real not null CHECK (largura > 0 and largura < 1.19),
-    altura real not null CHECK (altura > 0 and altura < 0.81),
-    peso real not null CHECK (peso > 0 and peso < 35),
-    lugar int REFERENCES Bilhete(lugar)
+    comprimento real not null CHECK (comprimento > 0 and comprimento < 1.2),
+    largura real not null CHECK (largura > 0 and largura < 1.2),
+    altura real not null CHECK (altura > 0 and altura < 0.82),
+    peso int not null CHECK (peso > 0 and peso < 36),
+    idBilhete int REFERENCES Bilhete(idBilhete) ON DELETE SET NULL NOT NULL ON CONFLICT ABORT
 );
 
 --Bilhete
 DROP TABLE IF EXISTS Bilhete;
 
 CREATE TABLE Bilhete (
-    lugar int not null CHECK (lugar < 201), --int?
+    idBilhete int not null,
+    lugar int not null CHECK (lugar < 201),
     preco int not null CHECK (preco > 0),
-    email text REFERENCES Conta(email) ,
-    idVoo int REFERENCES Voo(idVoo) ,
-    PRIMARY KEY (lugar)
+    email text REFERENCES Conta(email) ON DELETE SET NULL NOT NULL ON CONFLICT ABORT,
+    idVoo text REFERENCES Voo(idVoo) ON DELETE SET NULL NOT NULL ON CONFLICT ABORT,
+    PRIMARY KEY (idBilhete)
 );
 
 --Conta
@@ -79,8 +80,8 @@ DROP TABLE IF EXISTS Passageiro;
 
 CREATE TABLE Passageiro (
     idPassageiro int PRIMARY KEY,
-    email text REFERENCES Conta(email) ,
-    idPessoa int REFERENCES Pessoa(idPessoa)
+    email text REFERENCES Conta(email) on DELETE set null not null on CONFLICT ABORT,
+    idPessoa int REFERENCES Pessoa(idPessoa) on DELETE set null not null on CONFLICT ABORT
 );
 
 --Piloto
@@ -89,7 +90,7 @@ DROP TABLE IF EXISTS Piloto;
 CREATE TABLE Piloto (
     idEmpresa int PRIMARY KEY,
     horasVoo int not null,
-    idPessoa text REFERENCES Pessoa(idPessoa) 
+    idPessoa int REFERENCES Pessoa(idPessoa) on delete set null not null on CONFLICT ABORT
 );
 
 --AssistenteBordo
@@ -98,7 +99,7 @@ DROP TABLE IF EXISTS AssistenteBordo;
 CREATE TABLE AssistenteBordo (
     idEmpresa int PRIMARY KEY,
     horasVoo int not null,
-    idPessoa text REFERENCES Pessoa(idPessoa) 
+    idPessoa int REFERENCES Pessoa(idPessoa) on delete set null not null on CONFLICT ABORT
 );
 
 --Pessoa
@@ -108,12 +109,12 @@ CREATE TABLE Pessoa (
     idPessoa int PRIMARY KEY,
     nome text not null,
     morada text not null,
-    telefone int not null CHECK (length(telefone) == 9),
-    passaporte text not null, --text?
+    telefone text not null CHECK (length(telefone) <= 18),
+    passaporte text not null, 
     dataNascimento DATE not null
 );
 
---Nacionalidade
+--Aeroporto
 DROP TABLE IF EXISTS Aeroporto;
 
 CREATE TABLE Aeroporto (
@@ -130,6 +131,32 @@ CREATE TABLE Pais (
     nomePais text PRIMARY KEY
 );
 
+--Nacionalidade
+DROP TABLE IF EXISTS Nacionalidade;
+
+CREATE TABLE Nacionalidade (
+    idPessoa int REFERENCES Pessoa(idPessoa) ,--on delete set null not null on CONFLICT ABORT,
+    nomePais text REFERENCES Pais(nomePais) ,--on delete set null not null on CONFLICT ABORT,
+    PRIMARY KEY (idPessoa, nomePais)
+);
+
+--Pilotagem
+DROP TABLE IF EXISTS Pilotagem;
+
+CREATE TABLE Pilotagem (
+    idEmpresa int REFERENCES Piloto(idEmpresa) on delete set null not null on CONFLICT ABORT,
+    idVoo int REFERENCES Voo(idVoo) on delete set null not null on CONFLICT ABORT,
+    PRIMARY KEY (idEmpresa, idVoo)
+);
+
+--PessoalCabine
+DROP TABLE IF EXISTS PessoalCabine;
+
+CREATE TABLE PessoalCabine (
+    idEmpresa int REFERENCES AssistenteBordo(idEmpresa) on delete set null not null on CONFLICT ABORT,
+    idVoo int REFERENCES Voo(idVoo) on delete set null not null on CONFLICT ABORT,
+    PRIMARY KEY (idEmpresa, idVoo)
+);
 
 COMMIT TRANSACTION;
 PRAGMA foreign_keys = on;
